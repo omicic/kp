@@ -12,25 +12,21 @@ class AdController extends Controller
 
     public function index()
     {
+        $all_ads = new Ad;
 
         if (isset(request()->cat)) {
-            // $cat = Category::where('name', request()->cat)->first();
-            //$all_ads = Ad::with('category')->where('category_id', $cat->id)->get();
-            //dd(request()->cat);
             $all_ads = Ad::whereHas('category', function ($query) {
                 $query->where('id', request()->cat);
-            })->get();
-
-            //dd($all_ads);
-        } else {
-
-            $all_ads = Ad::all();
+            });
         }
 
+        if (isset(request()->type)) {
+            $type = (request()->type == 'lower') ? 'asc' : 'desc';
+            $all_ads = $all_ads->orderBy('price', $type);
+        }
 
-
+        $all_ads = $all_ads->get();
         $categories = Category::all();
-        // $all_ads = Ad::all();
         return view('welcome', compact('all_ads', 'categories'));
     }
 
