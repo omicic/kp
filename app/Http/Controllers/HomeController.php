@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Ad;
 use App\Models\Category;
+use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -105,5 +107,35 @@ class HomeController extends Controller
     {
         $single_ad = Ad::find($id);
         return view('home.singleAd', ['single_ad' => $single_ad]);
+    }
+
+    public function showMessages()
+    {
+        $messages = Message::where('receiver_id', auth()->user()->id)->get();
+        return view('home.messages', compact('messages'));
+    }
+
+    public function replay()
+    {
+        $sender_id = request()->sender_id;
+        $ad_id = request()->ad_id;
+
+        $messages = Message::where('sender_id', $sender_id)->where('ad_id', $ad_id)->get();
+        return view('home.replay', compact('sender_id', 'ad_id', 'messages'));
+    }
+
+    public function replayStore(Request $request)
+    {
+        $sender = User::find($request->sender_id);
+        $ad = Ad::find($request->ad_id);
+
+        $new_msg = new Message();
+        $new_msg->text = $request->msg;
+        $new_msg->sender_id = auth()->user()->id;
+        $new_msg->receiver_id = $sender->id;
+        $new_msg->ad_id = $ad->id;
+        $new_msg->save();
+
+        return redirect()->route('home.showMessages')->with('message', 'Replay send');
     }
 }
