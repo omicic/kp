@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Models\Ad');
     }
+
+    public function messages()
+    {
+        return $this->hasMany('\App\Models\Message', 'receiver_id');
+    }
 }
